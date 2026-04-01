@@ -13,7 +13,7 @@ export default async function AllocationPage() {
   const budgets = await getBudgets(currentYear)
   
   // Filter budgets for the current month
-  const currentMonthBudgets = budgets.filter(b => b.month === currentMonth)
+  const currentMonthBudgets = budgets.filter((b: any) => b.month === currentMonth)
   
   // Compute total planned income for the current month
   let totalPlannedIncome = 0
