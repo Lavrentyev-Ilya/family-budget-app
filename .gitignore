@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Personal data
+*.xlsx
+*.xls
+*.csv
+
+# Temporary debug scripts
+test_*.js
+create_db.js
+list_dbs.js
+update_categories.ts

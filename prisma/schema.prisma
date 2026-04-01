@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String
+  type         TransactionType
+  color        String?
+  transactions Transaction[]
+  budgets      Budget[]
+  
+  // Percent for automatic distribution in income calculation (Текущий подсчет)
+  // E.g., 10 for 10%
+  distributionPercent Float? 
+  
+  // Custom ordering defined by user
+  sortOrder    Int           @default(0)
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id         String          @id @default(uuid())
+  amount     Decimal
+  date       DateTime
+  note       String?
+  type       TransactionType
+  category   Category        @relation(fields: [categoryId], references: [id])
+  categoryId String
+  user       User?           @relation(fields: [userId], references: [id])
+  userId     String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model Budget {
+  id            String   @id @default(uuid())
+  category      Category @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  month         Int // 1-12
+  year          Int
+  plannedAmount Decimal
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([categoryId, month, year])
+}
