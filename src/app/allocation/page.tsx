@@ -12,24 +12,28 @@ export default async function AllocationPage() {
   const allCategories = await getCategories()
   const budgets = await getBudgets(currentYear)
   
-  // Filter budgets for the current month
+  // 1. Фильтруем бюджеты (добавили any)
   const currentMonthBudgets = budgets.filter((b: any) => b.month === currentMonth)
   
-  // Compute total planned income for the current month
+  // 2. Считаем общий доход (добавили any для c и b)
   let totalPlannedIncome = 0
-  const incomeCategoryIds = new Set(allCategories.filter(c => c.type === 'INCOME').map(c => c.id))
+  const incomeCategoryIds = new Set(
+    allCategories
+      .filter((c: any) => c.type === 'INCOME')
+      .map((c: any) => c.id)
+  )
   
-  currentMonthBudgets.forEach(b => {
+  currentMonthBudgets.forEach((b: any) => {
     if (incomeCategoryIds.has(b.categoryId)) {
       totalPlannedIncome += Number(b.plannedAmount)
     }
   })
 
-  // Patched expense categories with calculated percentages
+  // 3. Обрабатываем категории расходов (добавили any для c и b)
   const expenseCategories = allCategories
-    .filter(c => c.type === 'EXPENSE')
-    .map(c => {
-      const budgetForCategory = currentMonthBudgets.find(b => b.categoryId === c.id)
+    .filter((c: any) => c.type === 'EXPENSE')
+    .map((c: any) => {
+      const budgetForCategory = currentMonthBudgets.find((b: any) => b.categoryId === c.id)
       const plannedExpense = budgetForCategory ? Number(budgetForCategory.plannedAmount) : 0
       
       let calculatedPercent = 0
