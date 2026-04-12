@@ -6,16 +6,17 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 
-export function AllocationCalculator({ 
+export function AllocationCalculator({
   initialCategories,
   totalPlannedIncome = 0
-}: { 
+}: {
   initialCategories: any[],
   totalPlannedIncome?: number
 }) {
   const [total, setTotal] = useState<number>(0)
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({})
   const [notes, setNotes] = useState<Record<string, string>>({})
+  const [topNote, setTopNote] = useState<string>('')
   const [isMounted, setIsMounted] = useState(false)
 
   // Load from offline storage
@@ -23,12 +24,15 @@ export function AllocationCalculator({
     setIsMounted(true)
     const savedTotal = localStorage.getItem('budget_allocation_total')
     if (savedTotal) setTotal(parseFloat(savedTotal))
-    
+
     const savedChecks = localStorage.getItem('budget_allocation_checks')
     if (savedChecks) setCheckedItems(JSON.parse(savedChecks))
-    
+
     const savedNotes = localStorage.getItem('budget_allocation_notes')
     if (savedNotes) setNotes(JSON.parse(savedNotes))
+
+    const savedTopNote = localStorage.getItem('budget_allocation_top_note')
+    if (savedTopNote) setTopNote(savedTopNote)
   }, [])
 
   // Sync state changes to offline storage
@@ -37,8 +41,9 @@ export function AllocationCalculator({
       localStorage.setItem('budget_allocation_total', total.toString())
       localStorage.setItem('budget_allocation_checks', JSON.stringify(checkedItems))
       localStorage.setItem('budget_allocation_notes', JSON.stringify(notes))
+      localStorage.setItem('budget_allocation_top_note', topNote)
     }
-  }, [total, checkedItems, notes, isMounted])
+  }, [total, checkedItems, notes, topNote, isMounted])
 
   const toggleCheck = (categoryId: string) => {
     setCheckedItems(prev => ({
@@ -60,15 +65,24 @@ export function AllocationCalculator({
           <CardDescription>Введите сумму дохода, чтобы подсчитать отчисления по категориям</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4 max-w-sm">
-            <span className="text-xl font-bold">₴</span>
-            <Input 
-              type="number" 
-              className="text-lg"
-              placeholder="100000"
-              value={total || ''}
-              onChange={e => setTotal(parseFloat(e.target.value) || 0)} 
-            />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full max-w-2xl">
+            <div className="flex items-center gap-4 w-full sm:w-1/2">
+              <span className="text-xl font-bold">₴</span>
+              <Input
+                type="number"
+                className="text-lg"
+                placeholder="100000"
+                value={total || ''}
+                onChange={e => setTotal(parseFloat(e.target.value) || 0)}
+              />
+            </div>
+            <div className="w-full sm:w-1/2">
+              <Input
+                value={topNote}
+                onChange={e => setTopNote(e.target.value)}
+                className="text-md"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -107,9 +121,9 @@ export function AllocationCalculator({
                 return (
                   <TableRow key={c.id} className={checkedItems[c.id] ? "opacity-50" : ""}>
                     <TableCell>
-                      <Checkbox 
-                        checked={!!checkedItems[c.id]} 
-                        onCheckedChange={() => toggleCheck(c.id)} 
+                      <Checkbox
+                        checked={!!checkedItems[c.id]}
+                        onCheckedChange={() => toggleCheck(c.id)}
                       />
                     </TableCell>
                     <TableCell className="font-medium">
@@ -123,9 +137,8 @@ export function AllocationCalculator({
                       {amount.toLocaleString('ru-RU')}
                     </TableCell>
                     <TableCell>
-                      <Input 
-                        placeholder="Заметка..." 
-                        value={notes[c.id] || ''} 
+                      <Input
+                        value={notes[c.id] || ''}
                         onChange={(e) => setNotes(prev => ({ ...prev, [c.id]: e.target.value }))}
                         className="w-full text-sm h-8"
                       />
