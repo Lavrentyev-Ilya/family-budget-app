@@ -15,6 +15,7 @@ export function AllocationCalculator({
 }) {
   const [total, setTotal] = useState<number>(0)
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({})
+  const [notes, setNotes] = useState<Record<string, string>>({})
   const [isMounted, setIsMounted] = useState(false)
 
   // Load from offline storage
@@ -25,6 +26,9 @@ export function AllocationCalculator({
     
     const savedChecks = localStorage.getItem('budget_allocation_checks')
     if (savedChecks) setCheckedItems(JSON.parse(savedChecks))
+    
+    const savedNotes = localStorage.getItem('budget_allocation_notes')
+    if (savedNotes) setNotes(JSON.parse(savedNotes))
   }, [])
 
   // Sync state changes to offline storage
@@ -32,8 +36,9 @@ export function AllocationCalculator({
     if (isMounted) {
       localStorage.setItem('budget_allocation_total', total.toString())
       localStorage.setItem('budget_allocation_checks', JSON.stringify(checkedItems))
+      localStorage.setItem('budget_allocation_notes', JSON.stringify(notes))
     }
-  }, [total, checkedItems, isMounted])
+  }, [total, checkedItems, notes, isMounted])
 
   const toggleCheck = (categoryId: string) => {
     setCheckedItems(prev => ({
@@ -89,6 +94,7 @@ export function AllocationCalculator({
                 <TableHead>Категория</TableHead>
                 <TableHead className="w-32">Доля (%)</TableHead>
                 <TableHead className="text-right">Сумма (₴)</TableHead>
+                <TableHead className="w-1/4">Заметки</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,6 +121,14 @@ export function AllocationCalculator({
                     </TableCell>
                     <TableCell className="text-right font-bold text-lg">
                       {amount.toLocaleString('ru-RU')}
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        placeholder="Заметка..." 
+                        value={notes[c.id] || ''} 
+                        onChange={(e) => setNotes(prev => ({ ...prev, [c.id]: e.target.value }))}
+                        className="w-full text-sm h-8"
+                      />
                     </TableCell>
                   </TableRow>
                 )
